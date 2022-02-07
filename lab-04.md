@@ -246,7 +246,7 @@ laquinta %>%
     ## 10 LA       28 Louisiana      52378. 0.535
     ## # ... with 38 more rows
 
-Excersie 8
+### Excersie 8
 
 Let’s plot the locations for both establishments in the U.S. and then in
 NC. We can see that not every La Quinta has a Denny’s nearby. However,
