@@ -1,7 +1,7 @@
 ---
 title: "Lab 04 - La Quinta is Spanish for next to Denny's, Pt. 1"
-author: "Insert your name here"
-date: "Insert date here"
+author: "Fanyi Zeng"
+date: "02/06/22"
 output: github_document
 ---
 
@@ -18,34 +18,130 @@ states <- read_csv("data/states.csv")
 
 ### Exercise 1
 
-Remove this text, and add your answer for Exercise 1 here.
-Add code chunks as needed.
-Don't forget to label your code chunk.
-Do not use spaces in code chunk labels.
+denny's dataset
+dimensions: 6 columns and 1643 rows 
+each row represents a single denny's store
+each column represents a variable - (street) address, city, state, zip, longitude, latitude
+
+```{r dimensions}
+ncol(dennys)
+nrow(dennys)
+view(dennys)
+```
 
 ### Exercise 2
 
-Remove this text, and add your answer for Exercise 2 here.
-Add code chunks as needed.
-Don't forget to label your code chunk.
-Do not use spaces in code chunk labels.
+la quinta's dataset
+dimensions: 6 columns and 909 rows 
+each row represents a single la quinta hotel
+each column represents a variable - (street) address, city, state, zip, longitude, latitude
+
+```{r dimensions}
+ncol(laquinta)
+nrow(laquinta)
+view(laquinta)
+```
 
 ### Exercise 3
 
-...
+All Denny's locations are within the country. Let's add a country variable for Denny's.
+
+```{r dennys-states}
+dennys %>%
+  filter(!(state %in% states$abbreviation))
+```
+
+```{r dennys-country}
+dennys <- dennys %>%
+  mutate(country = "United States")
+```
+
 
 ### Exercise 4
 
-...
+La Quinta have locations outside of US, including Mexico, Canada, China, New Zealand, Honduras, Turkey, United Arab Emirates, Chile, and Colombia.
+
+```{r laquinta-states}
+laquinta %>%
+  filter(!(state %in% states$abbreviation))
+```
 
 ### Exercise 5
 
-...
+Let's add a country variable for la quinta.
+
+```{r laquinta-country}
+laquinta <- laquinta %>%
+  mutate(country = case_when(
+    state %in% state.abb     ~ "United States",
+    state %in% c("ON", "BC") ~ "Canada",
+    state == "ANT"           ~ "Colombia",
+    state %in% c("AG", "QR", "CH", "NL", "VE", "PU", "SL") ~ "Mexico",
+    state == "FM" ~ "Honduras"))
+```
 
 ### Exercise 6
 
-...
+Let's filter out non-US locations.
 
- 
-Add exercise headings as needed.
+```{r filter-nonUS}
+laquinta <- laquinta %>%
+  filter(country == "United States")
+```
 
+### Exercise 7
+
+CA has the most Denny's locations.
+TX has the most La Quinta's locations.
+
+```{r most-state}
+dennys %>%
+  count(state) %>%
+  arrange(desc(n))
+laquinta %>%
+  count(state) %>%
+  arrange(desc(n))
+```
+
+Per square thousand miles:
+DC has the most Denny's locations per 1000 sq miles.
+RI has the most La Quinta's locations per 1000 sq miles.
+
+```{r most-concentrated}
+dennys %>%
+  count(state) %>%
+  inner_join(states, by = c("state" = "abbreviation")) %>%
+  mutate(concentration = n/area*1000) %>%
+  arrange(desc(concentration))
+
+
+laquinta %>%
+  count(state) %>%
+  inner_join(states, by = c("state" = "abbreviation")) %>%
+  mutate(conc = n/area*1000) %>%
+  arrange(desc(conc))
+```
+
+Excersie 8
+
+Let's plot the locations for both establishments in the U.S. and then in NC. We can see that not every La Quinta has a Denny's nearby. However, it seems to hold for TX.
+
+```{r bind-and-plot}
+dennys <- dennys %>%
+  mutate(establishment = "Denny's")
+laquinta <- laquinta %>%
+  mutate(establishment = "La Quinta")
+dn_lq <- bind_rows(dennys, laquinta)
+ggplot(dn_lq, mapping = aes(x = longitude, y = latitude, color = establishment)) +
+  geom_point() +
+  labs(title = "locations of both establishments", subtitle = "by latitude and longitude")
+dn_lq %>%
+  filter(state == "NC") %>%
+  ggplot(data, mapping = aes(x = longitude, y = latitude, color = establishment, alpha = 0.5)) +
+  geom_point() +
+  labs(title = "locations of both establishments in NC", subtitle = "by latitude and longitude")
+dn_lq %>%
+  filter(state == "TX") %>%
+  ggplot(data, mapping = aes(x = longitude, y = latitude, color = establishment, alpha = 0.1)) +
+  geom_point() +
+  labs(title = "locations of both establishments in TX", subtitle = "by latitude and longitude")
