@@ -146,3 +146,4 @@ dn_lq %>%
   ggplot(data, mapping = aes(x = longitude, y = latitude, color = establishment, alpha = 0.1)) +
   geom_point() +
   labs(title = "locations of both establishments in TX", subtitle = "by latitude and longitude")
+```
